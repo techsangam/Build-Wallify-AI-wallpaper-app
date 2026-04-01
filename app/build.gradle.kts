@@ -31,10 +31,10 @@ android {
 
         buildConfigField(
             "String",
-            "UNSPLASH_ACCESS_KEY",
-            "\"${localProperties.getProperty("UNSPLASH_ACCESS_KEY", "")}\"",
+            "WALLHAVEN_API_KEY",
+            "\"${localProperties.getProperty("WALLHAVEN_API_KEY", "")}\"",
         )
-        buildConfigField("String", "UNSPLASH_BASE_URL", "\"https://api.unsplash.com/\"")
+        buildConfigField("String", "WALLHAVEN_BASE_URL", "\"https://wallhaven.cc/api/v1/\"")
     }
 
     buildTypes {
@@ -119,3 +119,4 @@ dependencies {
 kapt {
     correctErrorTypes = true
 }
+

@@ -127,7 +127,7 @@ fun HomeRoute(
             item(span = { GridItemSpan(maxLineSpan) }) {
                 EmptyStateCard(
                     title = "Nothing cached yet",
-                    subtitle = uiState.errorMessage ?: "Pull a fresh feed once your Unsplash key is ready.",
+                    subtitle = uiState.errorMessage ?: "Pull a fresh feed once Wallhaven is reachable.",
                 )
             }
         } else {

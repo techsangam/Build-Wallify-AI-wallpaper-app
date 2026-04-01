@@ -56,8 +56,8 @@ class HomeViewModel @Inject constructor(
             val wallpapers = wallpaperResult.getOrDefault(emptyList())
             val errorMessage = when {
                 wallpapers.isNotEmpty() -> null
-                BuildConfig.UNSPLASH_ACCESS_KEY.isBlank() ->
-                    "Add UNSPLASH_ACCESS_KEY to local.properties to unlock live Unsplash wallpapers."
+                BuildConfig.WALLHAVEN_API_KEY.isBlank() ->
+                    "Add WALLHAVEN_API_KEY to local.properties to unlock authenticated Wallhaven access."
                 else -> wallpaperResult.exceptionOrNull()?.message ?: "Unable to load wallpapers right now."
             }
 

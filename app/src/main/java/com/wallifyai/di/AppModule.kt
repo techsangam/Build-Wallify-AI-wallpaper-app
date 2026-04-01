@@ -9,9 +9,9 @@ import com.wallifyai.data.local.AppDatabase
 import com.wallifyai.data.local.dao.CachedWallpaperDao
 import com.wallifyai.data.local.dao.FavoriteWallpaperDao
 import com.wallifyai.data.local.dao.UserActivityDao
-import com.wallifyai.data.remote.api.UnsplashApiService
+import com.wallifyai.data.remote.api.WallhavenApiService
 import com.wallifyai.data.remote.interceptor.RetryOnFailureInterceptor
-import com.wallifyai.data.remote.interceptor.UnsplashAuthInterceptor
+import com.wallifyai.data.remote.interceptor.WallhavenAuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,7 +39,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        authInterceptor: UnsplashAuthInterceptor,
+        authInterceptor: WallhavenAuthInterceptor,
         retryOnFailureInterceptor: RetryOnFailureInterceptor,
         loggingInterceptor: HttpLoggingInterceptor,
     ): OkHttpClient {
@@ -55,13 +55,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUnsplashApiService(okHttpClient: OkHttpClient): UnsplashApiService {
+    fun provideWallhavenApiService(okHttpClient: OkHttpClient): WallhavenApiService {
         return Retrofit.Builder()
-            .baseUrl(BuildConfig.UNSPLASH_BASE_URL)
+            .baseUrl(BuildConfig.WALLHAVEN_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(UnsplashApiService::class.java)
+            .create(WallhavenApiService::class.java)
     }
 
     @Provides

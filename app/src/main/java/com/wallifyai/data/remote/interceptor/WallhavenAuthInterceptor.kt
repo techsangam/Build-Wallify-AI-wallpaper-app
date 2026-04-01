@@ -7,18 +7,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class UnsplashAuthInterceptor @Inject constructor() : Interceptor {
+class WallhavenAuthInterceptor @Inject constructor() : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request().newBuilder()
-            .addHeader("Accept-Version", "v1")
             .apply {
-                if (BuildConfig.UNSPLASH_ACCESS_KEY.isNotBlank()) {
-                    addHeader("Authorization", "Client-ID ${BuildConfig.UNSPLASH_ACCESS_KEY}")
+                if (BuildConfig.WALLHAVEN_API_KEY.isNotBlank()) {
+                    addHeader("X-API-Key", BuildConfig.WALLHAVEN_API_KEY)
                 }
             }
             .build()
         return chain.proceed(request)
     }
 }
-
