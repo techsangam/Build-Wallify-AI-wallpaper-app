@@ -2,22 +2,32 @@ package com.wallifyai.data.mapper
 
 import com.wallifyai.data.local.entity.CachedWallpaperEntity
 import com.wallifyai.data.local.entity.FavoriteWallpaperEntity
-import com.wallifyai.data.remote.dto.UnsplashPhotoDto
+import com.wallifyai.data.remote.dto.WallhavenWallpaperDto
 import com.wallifyai.domain.model.Wallpaper
 import com.wallifyai.domain.model.WallpaperCategory
 
-fun UnsplashPhotoDto.toDomain(category: WallpaperCategory): Wallpaper {
+fun WallhavenWallpaperDto.toDomain(category: WallpaperCategory): Wallpaper {
+    val fallbackTitle = when {
+        category != WallpaperCategory.ALL -> "${category.title} wallpaper"
+        !this.category.isNullOrBlank() -> "${this.category.replaceFirstChar { it.titlecase() }} wallpaper"
+        else -> "Wallpaper"
+    }
+    val tagSummary = tags.orEmpty().mapNotNull { it.name }
+        .filter { it.isNotBlank() }
+        .take(3)
+        .joinToString(separator = " / ")
+
     return Wallpaper(
         id = id,
         category = category.storageKey,
-        description = description ?: altDescription ?: "${category.title} wallpaper",
-        regularUrl = urls.regular,
-        fullUrl = urls.full,
-        thumbUrl = urls.thumb,
-        authorName = user.name,
+        description = tagSummary.ifBlank { fallbackTitle },
+        regularUrl = thumbs.large ?: path,
+        fullUrl = path,
+        thumbUrl = thumbs.small ?: thumbs.large ?: path,
+        authorName = uploader?.username?.takeUnless { it.isBlank() } ?: "Wallhaven",
         width = width,
         height = height,
-        downloadLocation = links.downloadLocation,
+        downloadLocation = path,
     )
 }
 
@@ -84,4 +94,5 @@ fun CachedWallpaperEntity.toDomain(): Wallpaper {
         downloadLocation = downloadLocation,
     )
 }
+
 

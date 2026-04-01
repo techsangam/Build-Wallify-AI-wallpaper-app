@@ -6,12 +6,15 @@ enum class WallpaperCategory(
     val storageKey: String,
 ) {
     ALL(title = "Trending", query = "", storageKey = "all"),
-    NATURE(title = "Nature", query = "nature wallpaper", storageKey = "nature"),
-    CARS(title = "Cars", query = "super cars wallpaper", storageKey = "cars"),
-    TECH(title = "Tech", query = "technology wallpaper", storageKey = "tech"),
-    ABSTRACT(title = "Abstract", query = "abstract art wallpaper", storageKey = "abstract"),
-    ANIMALS(title = "Animals", query = "animals wallpaper", storageKey = "animals"),
+    NATURE(title = "Nature", query = "nature landscape", storageKey = "nature"),
+    CARS(title = "Cars", query = "cars automotive", storageKey = "cars"),
+    TECH(title = "Tech", query = "technology futuristic", storageKey = "tech"),
+    ABSTRACT(title = "Abstract", query = "abstract minimal", storageKey = "abstract"),
+    ANIMALS(title = "Animals", query = "animals wildlife", storageKey = "animals"),
     ;
+
+    val apiQuery: String?
+        get() = query.takeIf { it.isNotBlank() }
 
     companion object {
         val feedCategories: List<WallpaperCategory>
@@ -22,4 +25,3 @@ enum class WallpaperCategory(
         }
     }
 }
-

@@ -1,6 +1,5 @@
 package com.wallifyai.data.repository
 
-import com.wallifyai.BuildConfig
 import com.wallifyai.data.local.dao.CachedWallpaperDao
 import com.wallifyai.data.local.dao.FavoriteWallpaperDao
 import com.wallifyai.data.local.dao.UserActivityDao
@@ -8,7 +7,7 @@ import com.wallifyai.data.local.entity.UserActivityEntity
 import com.wallifyai.data.mapper.toCacheEntity
 import com.wallifyai.data.mapper.toDomain
 import com.wallifyai.data.mapper.toFavoriteEntity
-import com.wallifyai.data.remote.api.UnsplashApiService
+import com.wallifyai.data.remote.api.WallhavenApiService
 import com.wallifyai.domain.model.UserActionType
 import com.wallifyai.domain.model.Wallpaper
 import com.wallifyai.domain.model.WallpaperCategory
@@ -21,7 +20,7 @@ import javax.inject.Singleton
 
 @Singleton
 class WallpaperRepository @Inject constructor(
-    private val apiService: UnsplashApiService,
+    private val apiService: WallhavenApiService,
     private val cachedWallpaperDao: CachedWallpaperDao,
     private val favoriteWallpaperDao: FavoriteWallpaperDao,
     private val userActivityDao: UserActivityDao,
@@ -33,20 +32,18 @@ class WallpaperRepository @Inject constructor(
         perPage: Int = DEFAULT_PAGE_SIZE,
     ): List<Wallpaper> = withContext(Dispatchers.IO) {
         runCatching {
-            require(BuildConfig.UNSPLASH_ACCESS_KEY.isNotBlank()) {
-                "Missing Unsplash API key. Add UNSPLASH_ACCESS_KEY to local.properties."
-            }
-
-            val items = if (category == WallpaperCategory.ALL) {
-                apiService.getPhotos(page = page, perPage = perPage)
-                    .map { it.toDomain(category) }
-            } else {
-                apiService.searchPhotos(
-                    query = category.query,
-                    page = page,
-                    perPage = perPage,
-                ).results.map { it.toDomain(category) }
-            }
+            val items = apiService.searchWallpapers(
+                query = category.apiQuery,
+                page = page,
+                categories = DEFAULT_CATEGORIES,
+                purity = DEFAULT_PURITY,
+                sorting = if (category == WallpaperCategory.ALL) "toplist" else "relevance",
+                order = "desc",
+                topRange = if (category == WallpaperCategory.ALL) "1M" else null,
+                minimumResolution = DEFAULT_MINIMUM_RESOLUTION,
+            ).data
+                .map { it.toDomain(category) }
+                .take(perPage)
 
             cachedWallpaperDao.upsertAll(items.map { it.toCacheEntity(page) })
             items
@@ -63,12 +60,15 @@ class WallpaperRepository @Inject constructor(
             .filter { it != WallpaperCategory.ALL }
             .ifEmpty { listOf(WallpaperCategory.NATURE, WallpaperCategory.TECH) }
 
-        val itemsPerCategory = (limit / topCategories.size).coerceAtLeast(4)
         val remoteItems = topCategories.flatMap { category ->
             runCatching {
-                getWallpapers(category = category, page = 1, perPage = itemsPerCategory)
+                getWallpapers(
+                    category = category,
+                    page = 1,
+                    perPage = DEFAULT_PAGE_SIZE,
+                )
             }.getOrElse {
-                cachedWallpaperDao.getLatestByCategory(category.storageKey, itemsPerCategory).map { entity ->
+                cachedWallpaperDao.getLatestByCategory(category.storageKey, DEFAULT_PAGE_SIZE).map { entity ->
                     entity.toDomain()
                 }
             }
@@ -122,7 +122,10 @@ class WallpaperRepository @Inject constructor(
     }
 
     companion object {
-        const val DEFAULT_PAGE_SIZE = 20
+        private const val DEFAULT_CATEGORIES = "111"
+        private const val DEFAULT_PURITY = "100"
+        private const val DEFAULT_MINIMUM_RESOLUTION = "1920x1080"
+
+        const val DEFAULT_PAGE_SIZE = 24
     }
 }
-
